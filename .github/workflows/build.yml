@@ -308,6 +308,11 @@ jobs:
           $REPO --trace sync -c -j$(nproc --all) --no-tags --fail-fast
           echo "REMOTE_BRANCH=$REMOTE_BRANCH" >> $GITHUB_ENV
 
+      - name: 注入 HWID 白名单校验
+        run: |
+          chmod +x "$GITHUB_WORKSPACE/hwid/inject_hwid_lock.sh"
+          "$GITHUB_WORKSPACE/hwid/inject_hwid_lock.sh" "$KERNEL_ROOT/common"
+
       - name: 应用 Stock Config 伪装
         run: |
           STOCK_SRC="$GITHUB_WORKSPACE/config/stock_defconfig"
