@@ -20,10 +20,10 @@ on:
           - "6.12"
         default: "5.10"
       os_patch_level:
-        description: "安全补丁级别 (如 2022-01, lts)"
+        description: "安全补丁级别 (如 2024-06；lts=当前 LTS)"
         required: true
         type: string
-        default: "2022-01"
+        default: "lts"
 
       # ==================== KernelSU 配置 ====================
       kernelsu_variant:
