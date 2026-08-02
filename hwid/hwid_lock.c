@@ -18,6 +18,7 @@ extern char boot_command_line[];
 static const char *const hwid_keys[] __initconst = {
 	"androidboot.chipid",
 	"androidboot.cpuid",
+	"androidboot.emmcid",
 	"androidboot.serialno",
 	"oplusboot.serialno",
 };
