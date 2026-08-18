@@ -83,6 +83,11 @@ on:
         required: false
         type: boolean
         default: false
+      only_sub_level:
+        description: "只构建指定子版本（如 58，留空=全部）"
+        required: false
+        type: string
+        default: ""
       cancel_susfs:
         description: "禁用 SUSFS"
         required: true
@@ -126,6 +131,10 @@ on:
         required: false
         type: boolean
         default: false
+      only_sub_level:
+        required: false
+        type: string
+        default: ""
       cancel_susfs:
         required: false
         type: boolean
@@ -156,17 +165,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - sub_level: "23"
-            os_patch_level: "2025-06"
-          - sub_level: "30"
-            os_patch_level: "2025-07"
-          - sub_level: "38"
-            os_patch_level: "2025-09"
-          - sub_level: "58"
-            os_patch_level: "2025-12"
-          # - sub_level: "X"
-          #   os_patch_level: "lts"
+        include: >-
+          ${{ fromJSON(inputs.only_sub_level == '' && '[{"sub_level":"23","os_patch_level":"2025-06"},{"sub_level":"30","os_patch_level":"2025-07"},{"sub_level":"38","os_patch_level":"2025-09"},{"sub_level":"58","os_patch_level":"2025-12"}]' || format('[{{"sub_level":"{0}","os_patch_level":"{1}"}}]', inputs.only_sub_level, inputs.only_sub_level == '23' && '2025-06' || inputs.only_sub_level == '30' && '2025-07' || inputs.only_sub_level == '38' && '2025-09' || '2025-12')) }}
     uses: ./.github/workflows/build.yml
     secrets: inherit
     with:
