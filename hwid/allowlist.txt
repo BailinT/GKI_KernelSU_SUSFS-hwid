@@ -3,3 +3,5 @@ abbe0d2c
 91c3b8f2
 0x0000044864acd92f
 0x0000046a10dfd755
+# Redmi K Pad 2 (yili, MT8910/mt6993, androidboot.cpuid, 2026-08-18)
+0x177e2f0ff5dc85725b559e44f211bf49c5e76b159d6f5a26aaecab1c

@@ -60,6 +60,11 @@ on:
         required: false
         type: boolean
         default: false
+      use_builtin_cfg80211:
+        description: "跳过无线模块 CRC 检查（小米天玑等 MTK 机型 WiFi 需要，默认关闭）"
+        required: false
+        type: boolean
+        default: false
       enable_susfs:
         required: true
         type: boolean
@@ -110,6 +115,7 @@ jobs:
           echo "KPM 功能      : ${{ inputs.use_kpm }}"
           echo "Re-Kernel     : ${{ inputs.use_rekernel }}"
           echo "CVE-2026-43499: ${{ inputs.cve_2026_43499_patch }}"
+          echo "内置cfg80211  : ${{ inputs.use_builtin_cfg80211 }}"
           echo "Droidspaces   : ${{ inputs.droidspaces }}"
           echo "NTSync        : ${{ inputs.droidspaces_ntsync }}"
           echo "产物上传模式  : ${{ inputs.artifact_upload_mode }}"
@@ -1222,6 +1228,21 @@ jobs:
           wget -O- https://github.com/vc-teahouse/Baseband-guard/raw/main/setup.sh | bash
           echo "CONFIG_BBG=y" >> common/arch/arm64/configs/gki_defconfig
           sed -i '/^config LSM$/,/^help$/{ /^[[:space:]]*default/ { /baseband_guard/! s/selinux/selinux,baseband_guard/ } }' common/security/Kconfig
+
+      - name: 跳过无线模块 CRC 检查（天玑机型 WiFi）
+        if: inputs.use_builtin_cfg80211
+        working-directory: ${{ env.KERNEL_ROOT }}
+        run: |
+          # 小米/MTK 天玑机型的 vendor 无线模块（cfg80211/mac80211/rfkill/wlan_drv）
+          # 依赖的 cfg80211 ABI 与 AOSP GKI 内核有差异（cfg80211.h 结构体改动），
+          # 导致符号 CRC 不匹配（disagrees about version of symbol wiphy_new_nm）。
+          # 内置 AOSP cfg80211 也不行（CRC 仍不匹配）。
+          # 解法：保持 CONFIG_MODVERSIONS=y（不破坏 vermagic），patch check_version
+          # 对特定模块跳过 CRC 检查，让 vendor 自己的 .ko 正常加载。
+          PATCH_FILE="$GITHUB_WORKSPACE/patches/skip_crc_for_wireless_modules.patch"
+          cd common
+          patch -p1 -F 3 < "$PATCH_FILE" || true
+          grep -q "skip_crc_modules" kernel/module/version.c && echo "patch 应用成功" || { echo "::error::CRC skip patch 未应用"; exit 1; }
 
       - name: 应用 Re-Kernel
         if: inputs.use_rekernel

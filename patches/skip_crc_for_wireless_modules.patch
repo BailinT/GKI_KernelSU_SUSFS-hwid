@@ -1,0 +1,25 @@
+--- a/kernel/module/version.c
++++ b/kernel/module/version.c
+@@ -68,6 +68,22 @@
+ 	return 1;
+ 
+ bad_version:
++	/*
++	 * 小米/MTK 天玑机型的 vendor 无线模块（cfg80211/mac80211/rfkill/wlan_drv）
++	 * 依赖的 cfg80211 ABI 与 AOSP GKI 内核有差异（cfg80211.h 结构体改动），
++	 * 导致符号 CRC 不匹配。对这些模块跳过 CRC 检查，允许加载。
++	 * 仅影响上述模块，其他模块的 CRC 检查不受影响。
++	 */
++	if (info->name) {
++		static const char * const skip_crc_modules[] = {
++			"cfg80211", "mac80211", "rfkill",
++			"wlan_drv_gen4m_6993_6653", "wlan_drv_gen4m_6897",
++			NULL
++		};
++		for (const char * const *m = skip_crc_modules; *m; m++)
++			if (strcmp(info->name, *m) == 0)
++				return 1;
++	}
+ 	pr_warn("%s: disagrees about version of symbol %s\n", info->name, symname);
+ 	return 0;
+ }
