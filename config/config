@@ -13,7 +13,11 @@
 # ================================================================
 
 # 是否启用自定义提交 (true/false)
-custom=false
+# 2026-08-22 pin 原因：susfs4ksu 8-19 提交 c23be8a 把 50_add patch 里
+# getname_flags() 写成 3 参数调用，而 GKI android16-6.12 树是 2 参数版
+# （fs/namei.c:129），全系编译失败。8bc0ecb 为 8-18 实测可构建版本。
+# 上游修复后可解除 pin。
+custom=true
 
 # ==================== SUSFS 各分支的 commit hash ====================
 # 仅当 custom=true 时生效
@@ -21,7 +25,7 @@ gki-android12-5.10=
 gki-android13-5.15=
 gki-android14-6.1=
 gki-android15-6.6=
-gki-android16-6.12=
+gki-android16-6.12=8bc0ecb
 
 # ==================== SukiSU 的 commit hash ====================
 # 仅当 custom=true 且使用 SukiSU 变体时生效
