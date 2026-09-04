@@ -32,7 +32,7 @@ on:
         description: "KPM 功能（enabled 仅开源码配置，patched 会编译后修补 Image）"
         required: true
         type: choice
-        default: "disabled (关闭)"
+        default: "patched (开启并修补 Image)"
         options:
           - "disabled (关闭)"
           - "enabled (源码支持时开启)"
@@ -55,6 +55,11 @@ on:
           - "仅上传 AnyKernel3.zip"
           - "上传全部"
         default: "仅上传 AnyKernel3.zip"
+      only_sub_level:
+        description: "只构建指定子版本（如 172，留空=全部）"
+        required: false
+        type: string
+        default: ""
       droidspaces_ntsync:
         description: "启用 Droidspaces 容器 NTSync 支持（需启用 Droidspaces）"
         required: false
@@ -129,6 +134,10 @@ on:
         required: false
         type: boolean
         default: false
+      only_sub_level:
+        required: false
+        type: string
+        default: ""
       called_from_main:
         description: "是否从 main.yml 调用（内部使用）"
         required: false
@@ -141,53 +150,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - sub_level: "25"
-            os_patch_level: "2023-10"
-          - sub_level: "43"
-            os_patch_level: "2023-11"
-          - sub_level: "57"
-            os_patch_level: "2024-01"
-          - sub_level: "68"
-            os_patch_level: "2024-03"
-          - sub_level: "75"
-            os_patch_level: "2024-05"
-          - sub_level: "78"
-            os_patch_level: "2024-06"
-          - sub_level: "84"
-            os_patch_level: "2024-07"
-          - sub_level: "90"
-            os_patch_level: "2024-08"
-          - sub_level: "93"
-            os_patch_level: "2024-09"
-          - sub_level: "99"
-            os_patch_level: "2024-10"
-          - sub_level: "112"
-            os_patch_level: "2024-11"
-          - sub_level: "115"
-            os_patch_level: "2024-12"
-          - sub_level: "118"
-            os_patch_level: "2025-01"
-          - sub_level: "124"
-            os_patch_level: "2025-02"
-          - sub_level: "128"
-            os_patch_level: "2025-03"
-          - sub_level: "129"
-            os_patch_level: "2025-04"
-          - sub_level: "134"
-            os_patch_level: "2025-05"
-          - sub_level: "138"
-            os_patch_level: "2025-06"
-          - sub_level: "141"
-            os_patch_level: "2025-07"
-          - sub_level: "145"
-            os_patch_level: "2025-09"
-          - sub_level: "157"
-            os_patch_level: "2025-12"
-          - sub_level: "162"
-            os_patch_level: "2026-03"
-          - sub_level: "X"
-            os_patch_level: "lts"
+        include: >-
+          ${{ fromJSON(inputs.only_sub_level == '' && '[{"sub_level":"25","os_patch_level":"2023-10"},{"sub_level":"43","os_patch_level":"2023-11"},{"sub_level":"57","os_patch_level":"2024-01"},{"sub_level":"68","os_patch_level":"2024-03"},{"sub_level":"75","os_patch_level":"2024-05"},{"sub_level":"78","os_patch_level":"2024-06"},{"sub_level":"84","os_patch_level":"2024-07"},{"sub_level":"90","os_patch_level":"2024-08"},{"sub_level":"93","os_patch_level":"2024-09"},{"sub_level":"99","os_patch_level":"2024-10"},{"sub_level":"112","os_patch_level":"2024-11"},{"sub_level":"115","os_patch_level":"2024-12"},{"sub_level":"118","os_patch_level":"2025-01"},{"sub_level":"124","os_patch_level":"2025-02"},{"sub_level":"128","os_patch_level":"2025-03"},{"sub_level":"129","os_patch_level":"2025-04"},{"sub_level":"134","os_patch_level":"2025-05"},{"sub_level":"138","os_patch_level":"2025-06"},{"sub_level":"141","os_patch_level":"2025-07"},{"sub_level":"145","os_patch_level":"2025-09"},{"sub_level":"157","os_patch_level":"2025-12"},{"sub_level":"162","os_patch_level":"2026-03"},{"sub_level":"172","os_patch_level":"2026-06"},{"sub_level":"X","os_patch_level":"lts"}]' || format('[{{"sub_level":"{0}","os_patch_level":"{1}"}}]', inputs.only_sub_level, fromJSON('{"25":"2023-10","43":"2023-11","57":"2024-01","68":"2024-03","75":"2024-05","78":"2024-06","84":"2024-07","90":"2024-08","93":"2024-09","99":"2024-10","112":"2024-11","115":"2024-12","118":"2025-01","124":"2025-02","128":"2025-03","129":"2025-04","134":"2025-05","138":"2025-06","141":"2025-07","145":"2025-09","157":"2025-12","162":"2026-03","172":"2026-06"}')[inputs.only_sub_level] || '2026-06')) }}
     uses: ./.github/workflows/build.yml
     secrets: inherit
     with:

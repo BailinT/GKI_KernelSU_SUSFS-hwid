@@ -32,7 +32,7 @@ on:
         description: "KPM 功能（enabled 仅开源码配置，patched 会编译后修补 Image）"
         required: true
         type: choice
-        default: "disabled (关闭)"
+        default: "patched (开启并修补 Image)"
         options:
           - "disabled (关闭)"
           - "enabled (源码支持时开启)"
@@ -55,6 +55,11 @@ on:
           - "仅上传 AnyKernel3.zip"
           - "上传全部"
         default: "仅上传 AnyKernel3.zip"
+      only_sub_level:
+        description: "只构建指定子版本（如 139，留空=全部）"
+        required: false
+        type: string
+        default: ""
       droidspaces_ntsync:
         description: "启用 Droidspaces 容器 NTSync 支持（需启用 Droidspaces）"
         required: false
@@ -137,6 +142,10 @@ on:
         required: false
         type: boolean
         default: false
+      only_sub_level:
+        required: false
+        type: string
+        default: ""
       called_from_main:
         description: "是否从 main.yml 调用（内部使用）"
         required: false
@@ -149,37 +158,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - sub_level: "50"
-            os_patch_level: "2024-10"
-          - sub_level: "56"
-            os_patch_level: "2024-11"
-          - sub_level: "57"
-            os_patch_level: "2024-12"
-          - sub_level: "58"
-            os_patch_level: "2025-01"
-          - sub_level: "66"
-            os_patch_level: "2025-02"
-          - sub_level: "77"
-            os_patch_level: "2025-03"
-          - sub_level: "82"
-            os_patch_level: "2025-04"
-          - sub_level: "87"
-            os_patch_level: "2025-05"
-          - sub_level: "89"
-            os_patch_level: "2025-06"
-          - sub_level: "92"
-            os_patch_level: "2025-07"
-          - sub_level: "98"
-            os_patch_level: "2025-09"
-          - sub_level: "102"
-            os_patch_level: "2025-10"
-          - sub_level: "118"
-            os_patch_level: "2026-01"
-          - sub_level: "127"
-            os_patch_level: "2026-04"
-          - sub_level: "X"
-            os_patch_level: "lts"
+        include: >-
+          ${{ fromJSON(inputs.only_sub_level == '' && '[{"sub_level":"50","os_patch_level":"2024-10"},{"sub_level":"56","os_patch_level":"2024-11"},{"sub_level":"57","os_patch_level":"2024-12"},{"sub_level":"58","os_patch_level":"2025-01"},{"sub_level":"66","os_patch_level":"2025-02"},{"sub_level":"77","os_patch_level":"2025-03"},{"sub_level":"82","os_patch_level":"2025-04"},{"sub_level":"87","os_patch_level":"2025-05"},{"sub_level":"89","os_patch_level":"2025-06"},{"sub_level":"92","os_patch_level":"2025-07"},{"sub_level":"98","os_patch_level":"2025-09"},{"sub_level":"102","os_patch_level":"2025-10"},{"sub_level":"118","os_patch_level":"2026-01"},{"sub_level":"127","os_patch_level":"2026-04"},{"sub_level":"139","os_patch_level":"2026-07"},{"sub_level":"X","os_patch_level":"lts"}]' || format('[{{"sub_level":"{0}","os_patch_level":"{1}"}}]', inputs.only_sub_level, fromJSON('{"50":"2024-10","56":"2024-11","57":"2024-12","58":"2025-01","66":"2025-02","77":"2025-03","82":"2025-04","87":"2025-05","89":"2025-06","92":"2025-07","98":"2025-09","102":"2025-10","118":"2026-01","127":"2026-04","139":"2026-07"}')[inputs.only_sub_level] || '2026-07')) }}
     uses: ./.github/workflows/build.yml
     secrets: inherit
     with:

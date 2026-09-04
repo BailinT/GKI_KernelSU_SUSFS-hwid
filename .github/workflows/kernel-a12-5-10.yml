@@ -32,7 +32,7 @@ on:
         description: "KPM 功能（enabled 仅开源码配置，patched 会编译后修补 Image）"
         required: true
         type: choice
-        default: "disabled (关闭)"
+        default: "patched (开启并修补 Image)"
         options:
           - "disabled (关闭)"
           - "enabled (源码支持时开启)"

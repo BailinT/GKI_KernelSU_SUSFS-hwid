@@ -51,7 +51,7 @@ on:
       use_kpm:
         required: true
         type: string
-        default: "disabled (关闭)"
+        default: "patched (开启并修补 Image)"
       use_rekernel:
         required: false
         type: boolean
@@ -1295,6 +1295,10 @@ jobs:
         if: inputs.artifact_upload_mode == '上传全部'
         run: |
           cd "$ANYKERNEL3"
+          if [[ "${{ inputs.use_kpm }}" == patched* ]]; then
+            wget -q -O ./kpn.zip https://github.com/cctv18/KPatch-Next/releases/latest/download/kpn.zip
+            echo "已内置 kpn.zip（KPatch Next 独立 KPM 模块）"
+          fi
           ZIP_NAME="${{ inputs.android_version }}-${{ inputs.kernel_version }}.${{ inputs.sub_level }}-${{ inputs.os_patch_level }}-AnyKernel3.zip"
           mv ../Image ./Image
           zip -r "../$ZIP_NAME" ./*
@@ -1303,6 +1307,10 @@ jobs:
         if: inputs.artifact_upload_mode != '上传全部'
         run: |
           mv ./Image "$ANYKERNEL3/Image"
+          if [[ "${{ inputs.use_kpm }}" == patched* ]]; then
+            wget -q -O "$ANYKERNEL3/kpn.zip" https://github.com/cctv18/KPatch-Next/releases/latest/download/kpn.zip
+            echo "已内置 kpn.zip（KPatch Next 独立 KPM 模块）"
+          fi
 
       - name: 构建 Boot 镜像 (Android 12)
         if: inputs.android_version == 'android12'
