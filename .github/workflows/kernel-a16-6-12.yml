@@ -58,11 +58,6 @@ on:
         required: false
         type: boolean
         default: false
-      use_zram:
-        description: "启用 ZRAM 增强算法"
-        required: true
-        type: boolean
-        default: false
       use_bbg:
         description: "启用 BBG 防格机"
         required: true
@@ -111,8 +106,10 @@ on:
         type: string
         default: "Sun Dec 01 08:10:00 UTC 2024"
       use_zram:
-        required: true
+        description: "兼容调用参数；6.12 暂无增强补丁，仅支持 false"
+        required: false
         type: boolean
+        default: false
       use_bbg:
         required: true
         type: boolean
@@ -177,7 +174,7 @@ jobs:
       ksu_variant: ${{ inputs.kernelsu_variant }}
       version: ${{ inputs.version || '' }}
       build_time: ${{ inputs.build_time || '' }}
-      use_zram: false
+      use_zram: ${{ inputs.use_zram || false }}
       use_bbg: ${{ inputs.use_bbg }}
       use_kpm: ${{ inputs.use_kpm }}
       use_rekernel: ${{ inputs.use_rekernel || false }}

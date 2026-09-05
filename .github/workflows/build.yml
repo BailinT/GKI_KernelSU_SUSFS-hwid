@@ -43,15 +43,12 @@ on:
       use_zram:
         required: true
         type: boolean
-        default: true
       use_bbg:
         required: true
         type: boolean
-        default: true
       use_kpm:
         required: true
         type: string
-        default: "patched (开启并修补 Image)"
       use_rekernel:
         required: false
         type: boolean
@@ -68,7 +65,6 @@ on:
       enable_susfs:
         required: true
         type: boolean
-        default: true
       supp_op:
         required: false
         type: boolean
@@ -98,6 +94,12 @@ jobs:
       CCACHE_HARDLINK: "true"
 
     steps:
+      - name: 检查 ZRAM 版本支持
+        if: inputs.kernel_version == '6.12' && inputs.use_zram
+        run: |
+          echo "::error::6.12 暂无 ZRAM 增强补丁，请关闭 use_zram 后重新构建。"
+          exit 1
+
       - name: 构建信息摘要
         run: |
           echo "========================================"
@@ -1118,6 +1120,19 @@ jobs:
             fi
           fi
 
+      - name: 准备 Bazel 配置片段
+        working-directory: ${{ env.KERNEL_ROOT }}
+        run: |
+          if [ ! -f "build/build.sh" ]; then
+            # 在重试循环外生成一次；重试必须复用相同的功能配置。
+            FRAG="common/arch/arm64/configs/ksu.fragment"
+            diff --old-line-format='' --unchanged-line-format='' --new-line-format='%L' \
+              "$DEFCONFIG.orig" "$DEFCONFIG" > "$FRAG" || { status=$?; [ "$status" -eq 1 ] || exit "$status"; }
+            cp "$DEFCONFIG.orig" "$DEFCONFIG"
+            echo "=== KSU Fragment 内容 ==="
+            cat "$FRAG"
+          fi
+
       - name: 编译内核
         id: compile_kernel
         uses: nick-fields/retry@v4
@@ -1159,13 +1174,7 @@ jobs:
                 LTO=thin BUILD_CONFIG=common/build.config.gki.aarch64 build/build.sh CC="/usr/bin/ccache clang" || exit 1
                 strings "out/${{ inputs.android_version }}-${{ inputs.kernel_version }}/dist/Image" | grep 'Linux version'
               else
-                # 提取 gki_defconfig 修改到 fragment，避免 bazel trim 检查失败
                 FRAG="common/arch/arm64/configs/ksu.fragment"
-                diff "$DEFCONFIG.orig" "$DEFCONFIG" | grep '^>' | sed 's/^> //; s/^[[:space:]]*//' > "$FRAG" || true
-                cp "$DEFCONFIG.orig" "$DEFCONFIG"
-                echo "=== KSU Fragment 内容 ==="
-                cat "$FRAG"
-                echo "========================="
                 FRAG_FLAG=""
                 if [ -s "$FRAG" ]; then
                   FRAG_FLAG="--defconfig_fragment=//common:arch/arm64/configs/ksu.fragment"

@@ -81,7 +81,7 @@ on:
 
       # ==================== 功能开关 ====================
       use_zram:
-        description: "启用 ZRAM 增强算法"
+        description: "启用 ZRAM 增强算法（仅 5.10～6.6，6.12 暂不支持）"
         type: boolean
         default: false
       use_bbg:
@@ -225,7 +225,7 @@ jobs:
       kernelsu_variant: ${{ inputs.kernelsu_variant }}
       version: ${{ inputs.version }}
       build_time: ${{ inputs.build_time || '' }}
-      use_zram: ${{ inputs.use_zram }}
+      use_zram: false # 6.12 暂无增强补丁；该开关仅应用于其他版本
       use_bbg: ${{ inputs.use_bbg }}
       use_kpm: ${{ inputs.use_kpm }}
       use_rekernel: ${{ inputs.use_rekernel }}
@@ -398,7 +398,7 @@ jobs:
           echo "SUS_VER=$SUS_VER" >> $GITHUB_ENV
 
           # 功能开关显示
-          echo "LZ4_STATUS=${{ inputs.use_zram && '开启' || '未开启' }}" >> $GITHUB_ENV
+          echo "LZ4_STATUS=${{ inputs.use_zram && '开启（仅 5.10～6.6）' || '未开启' }}" >> $GITHUB_ENV
           echo "BBG_STATUS=${{ inputs.use_bbg && '支持' || '不支持' }}" >> $GITHUB_ENV
           if [[ "${{ inputs.use_kpm }}" == enabled* ]]; then
             echo "KPM_STATUS=源码支持时开启" >> $GITHUB_ENV

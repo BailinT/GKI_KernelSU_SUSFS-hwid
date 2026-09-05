@@ -86,7 +86,7 @@ on:
 
       # ==================== 功能开关 ====================
       use_zram:
-        description: "启用 ZRAM 增强算法"
+        description: "启用 ZRAM 增强算法（6.12 请保持关闭）"
         required: true
         type: boolean
         default: false
