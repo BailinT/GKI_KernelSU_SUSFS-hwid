@@ -1205,9 +1205,6 @@ jobs:
               fi
             fi
           fi
-              fi
-            fi
-          fi
 
           CURRENT_SUB="${{ inputs.sub_level }}"
           if [[ ! "$CURRENT_SUB" =~ ^[0-9]+$ ]]; then
