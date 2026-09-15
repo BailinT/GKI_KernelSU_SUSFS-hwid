@@ -62,6 +62,9 @@ on:
         type: boolean
         default: false
       use_builtin_cfg80211:
+        required: false
+        type: boolean
+        default: false
       export_susfs_patches:
         required: false
         type: boolean
