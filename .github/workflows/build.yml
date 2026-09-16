@@ -1421,7 +1421,13 @@ jobs:
                 if [ "${{ inputs.kernel_version }}" = "6.12" ]; then
                   LTO_FLAG="--lto=none"
                 fi
-                tools/bazel build --disk_cache=/home/runner/.cache/bazel --config=fast $LTO_FLAG $FRAG_FLAG //common:kernel_aarch64_dist || exit 1
+                # 内置 cfg80211 时须关闭 kleaf 的 KMI 裁剪，否则 trim_nonlisted_kmi
+                # 会把 fragment 要求的 CONFIG_CFG80211=y 强制降回 m 并报一致性错误
+                TRIM_FLAG=""
+                if [ "${{ inputs.use_builtin_cfg80211 }}" = "true" ]; then
+                  TRIM_FLAG="--notrim"
+                fi
+                tools/bazel build --disk_cache=/home/runner/.cache/bazel --config=fast $LTO_FLAG $FRAG_FLAG $TRIM_FLAG //common:kernel_aarch64_dist || exit 1
                 strings ./bazel-bin/common/kernel_aarch64/Image | grep 'Linux version'
               fi
 
