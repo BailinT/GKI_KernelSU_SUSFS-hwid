@@ -468,6 +468,17 @@ jobs:
           STOCK_SRC="$GITHUB_WORKSPACE/config/stock_defconfig"
           STOCK_DST="$KERNEL_ROOT/common/arch/arm64/configs/stock_defconfig"
 
+          # IKCONFIG 内容脱敏: config_data 嵌入配置过滤 CONFIG_KSU/KernelSU/SUSFS/NOMOUNT 行(2026-09-24 防泄露; 文件存在性/权限/vendor 读取均不变)
+          TARGET_MAKEFILE="$KERNEL_ROOT/common/kernel/Makefile"
+          OLDCAT='filechk_cat = cat $<'
+          NEWCAT="filechk_cat = grep -vE 'CONFIG_KSU|KernelSU|SUSFS|NOMOUNT' \$<"
+          if [ -f "$TARGET_MAKEFILE" ] && grep -qF "$OLDCAT" "$TARGET_MAKEFILE"; then
+            sed -i "s#$OLDCAT#$NEWCAT#" "$TARGET_MAKEFILE"
+            echo "IKCONFIG 已脱敏: $TARGET_MAKEFILE"
+          else
+            echo "::warning::未找到 $OLDCAT 规则, 跳过 IKCONFIG 脱敏"
+          fi
+
           if [ ! -f "$STOCK_SRC" ]; then
             echo "未检测到 $STOCK_SRC，跳过 Stock Config 伪装。"
             exit 0
