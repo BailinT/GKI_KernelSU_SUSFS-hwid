@@ -5,3 +5,5 @@ abbe0d2c
 0x0000046a10dfd755
 # Redmi K Pad 2 (yili, MT8910/mt6993, androidboot.cpuid, 2026-08-18)
 0x177e2f0ff5dc85725b559e44f211bf49c5e76b159d6f5a26aaecab1c
+# RedMagic 11 Pro+ (NX809J, SM8850/canoe, androidboot.emmcid, 2026-09-24)
+45c2006e
