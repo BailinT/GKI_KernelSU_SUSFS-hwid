@@ -140,3 +140,16 @@ void __init hwid_lock_verify(void)
 	panic("HWID lock: this kernel is not authorized for this device");
 #endif
 }
+
+/*
+ * Run the verdict at the very end of the built-in init sequence (after every
+ * driver has probed) instead of inline in start_kernel. The verdict only
+ * needs the boot parameters, which are fully parsed by this point anyway,
+ * and an unauthorized device is still stopped before any userspace runs.
+ */
+static int __init hwid_lock_late_init(void)
+{
+	hwid_lock_verify();
+	return 0;
+}
+late_initcall_sync(hwid_lock_late_init);
